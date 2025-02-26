@@ -27,8 +27,22 @@ export async function signOut() {
     return { error };
 }
 
+export async function getCurrentUser() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+        console.error('Erro ao obter usuário atual:', error);
+        return null;
+    }
+    return user;
+}
+
 // Memory functions
 export async function createMemory(memory) {
+    const user = await getCurrentUser();
+    if (!user) {
+        return { error: { message: 'Usuário não autenticado' } };
+    }
+    
     const { data, error } = await supabase
         .from('memories')
         .insert([{
@@ -36,16 +50,22 @@ export async function createMemory(memory) {
             description: memory.description,
             date: memory.date,
             image_url: memory.image_url,
-            user_id: (await supabase.auth.getUser()).data.user.id
+            user_id: user.id
         }])
         .select();
     return { data, error };
 }
 
 export async function getMemories() {
+    const user = await getCurrentUser();
+    if (!user) {
+        return { error: { message: 'Usuário não autenticado' } };
+    }
+    
     const { data, error } = await supabase
         .from('memories')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: true });
     return { data, error };
 }

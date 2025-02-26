@@ -81,46 +81,92 @@
             signOut, 
             createMemory, 
             getMemories, 
-            uploadImage 
+            uploadImage,
+            getCurrentUser 
         } from './js/supabase.js';
+
+        // Verificar se o usuário já está logado ao carregar a página
+        async function verificarUsuarioLogado() {
+            const user = await getCurrentUser();
+            if (user) {
+                mostrarConteudoPrincipal();
+                carregarMemorias();
+            }
+        }
+
+        // Executar verificação ao carregar a página
+        verificarUsuarioLogado();
 
         // Funções de Autenticação
         window.fazerLogin = async () => {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
             
-            const { error } = await signIn(email, password);
-            if (error) {
-                alert('Erro ao fazer login: ' + error.message);
+            if (!email || !password) {
+                alert('Por favor, preencha email e senha');
                 return;
             }
             
-            mostrarConteudoPrincipal();
-            carregarMemorias();
+            try {
+                const { data, error } = await signIn(email, password);
+                
+                if (error) {
+                    console.error('Erro de login:', error);
+                    alert('Erro ao fazer login: ' + error.message);
+                    return;
+                }
+                
+                console.log('Login bem-sucedido:', data);
+                mostrarConteudoPrincipal();
+                carregarMemorias();
+            } catch (err) {
+                console.error('Exceção durante login:', err);
+                alert('Erro inesperado ao fazer login');
+            }
         };
 
         window.fazerCadastro = async () => {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
             
-            const { error } = await signUp(email, password);
-            if (error) {
-                alert('Erro ao cadastrar: ' + error.message);
+            if (!email || !password) {
+                alert('Por favor, preencha email e senha');
                 return;
             }
             
-            alert('Cadastro realizado com sucesso! Faça login para continuar.');
+            try {
+                const { data, error } = await signUp(email, password);
+                
+                if (error) {
+                    console.error('Erro de cadastro:', error);
+                    alert('Erro ao cadastrar: ' + error.message);
+                    return;
+                }
+                
+                console.log('Cadastro bem-sucedido:', data);
+                alert('Cadastro realizado com sucesso! Faça login para continuar.');
+            } catch (err) {
+                console.error('Exceção durante cadastro:', err);
+                alert('Erro inesperado ao fazer cadastro');
+            }
         };
 
         window.sair = async () => {
-            const { error } = await signOut();
-            if (error) {
-                alert('Erro ao sair: ' + error.message);
-                return;
+            try {
+                const { error } = await signOut();
+                
+                if (error) {
+                    console.error('Erro ao sair:', error);
+                    alert('Erro ao sair: ' + error.message);
+                    return;
+                }
+                
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('hidden');
+            } catch (err) {
+                console.error('Exceção ao sair:', err);
+                alert('Erro inesperado ao sair');
             }
-            
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('mainContent').classList.add('hidden');
         };
 
         // Funções de Memórias
@@ -130,60 +176,84 @@
             const data = document.getElementById('dataMemoria').value;
             const imagemFile = document.getElementById('imagemMemoria').files[0];
 
-            let imageUrl = null;
-            if (imagemFile) {
-                const { data: url, error: uploadError } = await uploadImage(imagemFile);
-                if (uploadError) {
-                    alert('Erro ao fazer upload da imagem: ' + uploadError.message);
-                    return;
-                }
-                imageUrl = url;
-            }
-
-            const { error } = await createMemory({
-                title: titulo,
-                description: descricao,
-                date: data,
-                image_url: imageUrl
-            });
-
-            if (error) {
-                alert('Erro ao salvar memória: ' + error.message);
+            if (!titulo || !descricao || !data) {
+                alert('Por favor, preencha todos os campos obrigatórios');
                 return;
             }
 
-            alert('Memória salva com sucesso!');
-            fecharModal();
-            carregarMemorias();
+            try {
+                let imageUrl = null;
+                if (imagemFile) {
+                    const { data: url, error: uploadError } = await uploadImage(imagemFile);
+                    if (uploadError) {
+                        console.error('Erro de upload:', uploadError);
+                        alert('Erro ao fazer upload da imagem: ' + uploadError.message);
+                        return;
+                    }
+                    imageUrl = url;
+                }
+
+                const { error } = await createMemory({
+                    title: titulo,
+                    description: descricao,
+                    date: data,
+                    image_url: imageUrl
+                });
+
+                if (error) {
+                    console.error('Erro ao salvar memória:', error);
+                    alert('Erro ao salvar memória: ' + error.message);
+                    return;
+                }
+
+                alert('Memória salva com sucesso!');
+                fecharModal();
+                carregarMemorias();
+            } catch (err) {
+                console.error('Exceção ao salvar memória:', err);
+                alert('Erro inesperado ao salvar memória');
+            }
         };
 
         async function carregarMemorias() {
-            const { data: memorias, error } = await getMemories();
-            if (error) {
-                alert('Erro ao carregar memórias: ' + error.message);
-                return;
+            try {
+                const { data: memorias, error } = await getMemories();
+                
+                if (error) {
+                    console.error('Erro ao carregar memórias:', error);
+                    alert('Erro ao carregar memórias: ' + error.message);
+                    return;
+                }
+
+                const listaMemorias = document.getElementById('memoriasLista');
+                listaMemorias.innerHTML = '';
+
+                if (memorias && memorias.length > 0) {
+                    memorias.forEach(memoria => {
+                        const memoriaItem = document.createElement('div');
+                        memoriaItem.classList.add('memoria-item');
+                        memoriaItem.innerHTML = `
+                            <h3>${memoria.title}</h3>
+                            <p>${memoria.description}</p>
+                            <div class="data">${new Date(memoria.date).toLocaleDateString()}</div>
+                            ${memoria.image_url ? `<img src="${memoria.image_url}" class="imagem-memoria" />` : ''}
+                        `;
+                        listaMemorias.appendChild(memoriaItem);
+                    });
+                } else {
+                    listaMemorias.innerHTML = '<p>Nenhuma memória encontrada</p>';
+                }
+            } catch (err) {
+                console.error('Exceção ao carregar memórias:', err);
+                alert('Erro inesperado ao carregar memórias');
             }
-
-            const listaMemorias = document.getElementById('memoriasLista');
-            listaMemorias.innerHTML = '';
-
-            memorias.forEach(memoria => {
-                const memoriaItem = document.createElement('div');
-                memoriaItem.classList.add('memoria-item');
-                memoriaItem.innerHTML = `
-                    <h3>${memoria.title}</h3>
-                    <p>${memoria.description}</p>
-                    <div class="data">${new Date(memoria.date).toLocaleDateString()}</div>
-                    ${memoria.image_url ? `<img src="${memoria.image_url}" class="imagem-memoria" />` : ''}
-                `;
-                listaMemorias.appendChild(memoriaItem);
-            });
         }
 
         // Funções auxiliares
         function mostrarConteudoPrincipal() {
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('mainContent').classList.remove('hidden');
+            console.log('Conteúdo principal exibido');
         }
 
         window.fecharModal = () => {
