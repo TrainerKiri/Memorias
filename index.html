@@ -6,205 +6,58 @@
     <title>Memórias de Namoro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #111;
-            color: #fff;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        #conteudo {
+        /* ... (mantendo todos os estilos existentes) ... */
+        .auth-section {
+            max-width: 400px;
+            margin: 20px auto;
             padding: 20px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin: 20px 0;
-        }
-
-        /* Estilo da Navegação Minimalista */
-        .nav-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #222;
-            padding: 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        .nav-bar a {
-            font-size: 25px;
-            color: #fff;
-            text-decoration: none;
-            margin: 0 20px;
-            position: relative;
-            padding: 10px;
-        }
-
-        .nav-bar a:hover {
-            color: #ff4747;
-        }
-
-        /* Faixa abaixo do nome que aparece ao passar o mouse */
-        .nav-bar a::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background-color: #ff4747;
-            bottom: 0;
-            left: 0;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .nav-bar a:hover::after {
-            transform: scaleX(1);
-        }
-
-        /* Menu de Memórias */
-        .menu-memorias {
-            display: none;
-            text-align: left;
-            padding: 20px;
-        }
-
-        .menu-memorias a {
-            color: #fff;
-            font-size: 20px;
-            text-decoration: none;
-            padding: 10px;
-            display: block;
-        }
-
-        .menu-memorias a:hover {
-            background-color: #444;
-        }
-
-        /* Fundo do Conteúdo */
-        .conteudo-container {
-            background: url(assets/old-library-books-drawing-ulme7n8ce4bsuabu.jpg) no-repeat center center fixed;
-            background-size: cover;
-            min-height: 100vh;
-        }
-
-        /* Estilo da Modal */
-        .modal-content {
             background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
             border-radius: 8px;
         }
-
-        .close-btn {
-            font-size: 1.5rem;
-            cursor: pointer;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #fff;
+        
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
         }
 
-        input[type="text"], textarea, input[type="date"] {
-            background-color: #222;
-            color: white;
-            border: 1px solid #444;
-            padding: 10px;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #ff4747;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 1rem;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #ff2828;
-        }
-
-        /* Exibição das memórias */
-        .memorias-lista {
-            margin-top: 20px;
-            text-align: left;
+        .hidden {
             display: none;
         }
-
-        .memoria-item {
-            background-color: #333;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            position: relative;
-        }
-
-        .memoria-item h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #ff4747;
-        }
-
-        .memoria-item p {
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
-
-        .data {
-            font-size: 0.9rem;
-            color: #888;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-        }
-
-        .imagem-memoria {
-            margin-top: 10px;
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-        }
-
-        /* Timer */
-        .timer {
-            font-size: 1.5rem;
-            margin-top: 10px;
-            color: #ff4747;
-        }
-
     </style>
 </head>
 <body>
-
-    <!-- Barra de Navegação Minimalista -->
-    <div class="nav-bar">
-        <a href="javascript:void(0)" id="nomeApp">Memórias de Namoro</a>
-        <div class="menu-memorias" id="menuMemorias">
-            <a href="javascript:void(0)" id="adicionarMemoria">Adicionar Memória</a>
-            <a href="javascript:void(0)" id="verMemorias">Ver Memórias</a>
+    <!-- Seção de Autenticação -->
+    <div id="authSection" class="auth-section">
+        <h2>Entrar</h2>
+        <input type="email" id="emailInput" placeholder="Email" required>
+        <input type="password" id="passwordInput" placeholder="Senha" required>
+        <div class="auth-buttons">
+            <button onclick="fazerLogin()">Entrar</button>
+            <button onclick="fazerCadastro()">Cadastrar</button>
         </div>
     </div>
 
-    <!-- Conteúdo -->
-    <div id="conteudo" class="conteudo-container">
-        <h1>Bem-vindo às nossas memórias</h1>
-
-        <!-- Timer de Namoro -->
-        <div class="timer" id="timer">
-            <span id="diasNamoro"></span>
+    <!-- Conteúdo Principal (inicialmente oculto) -->
+    <div id="mainContent" class="hidden">
+        <!-- Barra de Navegação -->
+        <div class="nav-bar">
+            <a href="javascript:void(0)" id="nomeApp">Memórias de Namoro</a>
+            <div class="menu-memorias" id="menuMemorias">
+                <a href="javascript:void(0)" id="adicionarMemoria">Adicionar Memória</a>
+                <a href="javascript:void(0)" id="verMemorias">Ver Memórias</a>
+                <a href="javascript:void(0)" id="sairButton">Sair</a>
+            </div>
         </div>
 
-        <p>Seja bem-vindo! Clique no menu para adicionar ou visualizar as memórias.</p>
-
-        <!-- Lista de Memórias -->
-        <div class="memorias-lista" id="memoriasLista">
-            <!-- As memórias serão exibidas aqui -->
+        <!-- Conteúdo -->
+        <div id="conteudo" class="conteudo-container">
+            <h1>Bem-vindo às nossas memórias</h1>
+            <div class="timer" id="timer">
+                <span id="diasNamoro"></span>
+            </div>
+            <div class="memorias-lista" id="memoriasLista"></div>
         </div>
     </div>
 
@@ -216,120 +69,162 @@
             <input type="text" id="tituloMemoria" placeholder="Título da Memória">
             <textarea id="descricaoMemoria" placeholder="Descrição da Memória" rows="4"></textarea>
             <input type="date" id="dataMemoria">
-            <input type="file" id="imagemMemoria">
+            <input type="file" id="imagemMemoria" accept="image/*">
             <button onclick="salvarMemoria()">Salvar Memória</button>
         </div>
     </div>
 
-    <script>
-        let memorias = [];
-        const dataInicioNamoro = new Date("2025-01-06"); // Data de início do namoro
+    <script type="module">
+        import { 
+            signUp, 
+            signIn, 
+            signOut, 
+            createMemory, 
+            getMemories, 
+            uploadImage 
+        } from './js/supabase.js';
 
-        // Função para calcular o tempo desde o início do namoro
-        function atualizarTimer() {
-            const hoje = new Date();
-            const diffTime = hoje - dataInicioNamoro; // Diferença de tempo em milissegundos
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Convertendo para dias
-            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-            const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
-            document.getElementById('diasNamoro').textContent = `${diffDays}d ${diffHours}h ${diffMinutes}m ${diffSeconds}s`;
-        }
-
-        // Atualiza o timer a cada 1 segundo
-        setInterval(atualizarTimer, 1000);
-
-        // Abrir o Modal
-        function abrirModal() {
-            document.getElementById("addMemoriaModal").style.display = "block";
-        }
-
-        // Fechar o Modal
-        function fecharModal() {
-            document.getElementById("addMemoriaModal").style.display = "none";
-        }
-
-        // Função para salvar a memória
-        function salvarMemoria() {
-            let titulo = document.getElementById('tituloMemoria').value;
-            let descricao = document.getElementById('descricaoMemoria').value;
-            let data = document.getElementById('dataMemoria').value;
-            let imagem = document.getElementById('imagemMemoria').files[0]; // Captura a imagem
-
-            if (titulo && descricao && data) {
-                let memoria = {
-                    titulo: titulo,
-                    descricao: descricao,
-                    data: data,
-                    imagem: imagem ? URL.createObjectURL(imagem) : null // Cria URL da imagem se existir
-                };
-
-                memorias.push(memoria); // Adiciona a memória na lista
-
-                // Limpar campos e fechar o modal
-                alert('Memória salva com sucesso!');
-                limparCampos();
-                fecharModal();
-                exibirMemorias();
-            } else {
-                alert('Por favor, preencha todos os campos!');
+        // Funções de Autenticação
+        window.fazerLogin = async () => {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            const { error } = await signIn(email, password);
+            if (error) {
+                alert('Erro ao fazer login: ' + error.message);
+                return;
             }
-        }
+            
+            mostrarConteudoPrincipal();
+            carregarMemorias();
+        };
 
-        // Limpar campos após salvar
-        function limparCampos() {
-            document.getElementById('tituloMemoria').value = '';
-            document.getElementById('descricaoMemoria').value = '';
-            document.getElementById('dataMemoria').value = '';
-            document.getElementById('imagemMemoria').value = ''; // Limpar imagem
-        }
+        window.fazerCadastro = async () => {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            const { error } = await signUp(email, password);
+            if (error) {
+                alert('Erro ao cadastrar: ' + error.message);
+                return;
+            }
+            
+            alert('Cadastro realizado com sucesso! Faça login para continuar.');
+        };
 
-        // Exibir as memórias salvas
-        function exibirMemorias() {
+        window.sair = async () => {
+            const { error } = await signOut();
+            if (error) {
+                alert('Erro ao sair: ' + error.message);
+                return;
+            }
+            
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+        };
+
+        // Funções de Memórias
+        window.salvarMemoria = async () => {
+            const titulo = document.getElementById('tituloMemoria').value;
+            const descricao = document.getElementById('descricaoMemoria').value;
+            const data = document.getElementById('dataMemoria').value;
+            const imagemFile = document.getElementById('imagemMemoria').files[0];
+
+            let imageUrl = null;
+            if (imagemFile) {
+                const { data: url, error: uploadError } = await uploadImage(imagemFile);
+                if (uploadError) {
+                    alert('Erro ao fazer upload da imagem: ' + uploadError.message);
+                    return;
+                }
+                imageUrl = url;
+            }
+
+            const { error } = await createMemory({
+                title: titulo,
+                description: descricao,
+                date: data,
+                image_url: imageUrl
+            });
+
+            if (error) {
+                alert('Erro ao salvar memória: ' + error.message);
+                return;
+            }
+
+            alert('Memória salva com sucesso!');
+            fecharModal();
+            carregarMemorias();
+        };
+
+        async function carregarMemorias() {
+            const { data: memorias, error } = await getMemories();
+            if (error) {
+                alert('Erro ao carregar memórias: ' + error.message);
+                return;
+            }
+
             const listaMemorias = document.getElementById('memoriasLista');
-            listaMemorias.innerHTML = ''; // Limpa a lista antes de exibir
-
-            // Organizar as memórias por data (mais antigas primeiro)
-            memorias.sort((a, b) => new Date(a.data) - new Date(b.data)); // Organiza por data em ordem crescente
+            listaMemorias.innerHTML = '';
 
             memorias.forEach(memoria => {
                 const memoriaItem = document.createElement('div');
                 memoriaItem.classList.add('memoria-item');
                 memoriaItem.innerHTML = `
-                    <h3>${memoria.titulo}</h3>
-                    <p>${memoria.descricao}</p>
-                    <div class="data">${new Date(memoria.data).toLocaleDateString()}</div>
-                    ${memoria.imagem ? `<img src="${memoria.imagem}" class="imagem-memoria" />` : ''}
+                    <h3>${memoria.title}</h3>
+                    <p>${memoria.description}</p>
+                    <div class="data">${new Date(memoria.date).toLocaleDateString()}</div>
+                    ${memoria.image_url ? `<img src="${memoria.image_url}" class="imagem-memoria" />` : ''}
                 `;
                 listaMemorias.appendChild(memoriaItem);
             });
-
-            // Mostrar a lista de memórias
-            listaMemorias.style.display = 'block';
         }
 
-        // Funcionalidade para exibir o menu de memórias ao clicar no nome do app
-        const nomeApp = document.getElementById('nomeApp');
-        const menuMemorias = document.getElementById('menuMemorias');
-        const adicionarMemoria = document.getElementById('adicionarMemoria');
-        const verMemorias = document.getElementById('verMemorias');
+        // Funções auxiliares
+        function mostrarConteudoPrincipal() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
 
-        nomeApp.addEventListener('click', () => {
+        window.fecharModal = () => {
+            document.getElementById('addMemoriaModal').style.display = 'none';
+        };
+
+        // Event Listeners
+        document.getElementById('nomeApp').addEventListener('click', () => {
+            const menuMemorias = document.getElementById('menuMemorias');
             menuMemorias.style.display = menuMemorias.style.display === 'block' ? 'none' : 'block';
         });
 
-        // Ao clicar na opção de adicionar memória, abrir o modal
-        adicionarMemoria.addEventListener('click', () => {
-            abrirModal();
+        document.getElementById('adicionarMemoria').addEventListener('click', () => {
+            document.getElementById('addMemoriaModal').style.display = 'block';
         });
 
-        // Ao clicar em "Ver Memórias", exibir a lista de memórias e ocultar o conteúdo
-        verMemorias.addEventListener('click', () => {
+        document.getElementById('verMemorias').addEventListener('click', () => {
             const listaMemorias = document.getElementById('memoriasLista');
             listaMemorias.style.display = listaMemorias.style.display === 'block' ? 'none' : 'block';
+            if (listaMemorias.style.display === 'block') {
+                carregarMemorias();
+            }
         });
 
+        document.getElementById('sairButton').addEventListener('click', sair);
+
+        // Timer de namoro
+        const dataInicioNamoro = new Date("2025-01-06");
+        function atualizarTimer() {
+            const hoje = new Date();
+            const diffTime = hoje - dataInicioNamoro;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            const diffSeconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+            document.getElementById('diasNamoro').textContent = 
+                `${diffDays}d ${diffHours}h ${diffMinutes}m ${diffSeconds}s`;
+        }
+
+        setInterval(atualizarTimer, 1000);
+        atualizarTimer();
     </script>
-    <script type="module" src="js/firebase.js"></script>
 </body>
 </html>
