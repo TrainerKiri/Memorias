@@ -25,29 +25,47 @@
         .hidden {
             display: none;
         }
+        
+        .admin-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .admin-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .admin-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
-    <!-- Seção de Autenticação -->
-    <div id="authSection" class="auth-section">
-        <h2>Entrar</h2>
+    <!-- Seção de Autenticação (apenas para admin) -->
+    <div id="authSection" class="auth-section hidden">
+        <h2>Login de Administrador</h2>
         <input type="email" id="emailInput" placeholder="Email" required>
         <input type="password" id="passwordInput" placeholder="Senha" required>
         <div class="auth-buttons">
             <button onclick="fazerLogin()">Entrar</button>
-            <button onclick="fazerCadastro()">Cadastrar</button>
         </div>
     </div>
 
-    <!-- Conteúdo Principal (inicialmente oculto) -->
-    <div id="mainContent" class="hidden">
+    <!-- Conteúdo Principal (visível para todos) -->
+    <div id="mainContent">
         <!-- Barra de Navegação -->
         <div class="nav-bar">
             <a href="javascript:void(0)" id="nomeApp">Memórias de Namoro</a>
             <div class="menu-memorias" id="menuMemorias">
-                <a href="javascript:void(0)" id="adicionarMemoria">Adicionar Memória</a>
                 <a href="javascript:void(0)" id="verMemorias">Ver Memórias</a>
-                <a href="javascript:void(0)" id="sairButton">Sair</a>
+                <a href="javascript:void(0)" id="adminLoginButton" class="hidden">Admin</a>
+                <a href="javascript:void(0)" id="sairButton" class="hidden">Sair</a>
             </div>
         </div>
 
@@ -57,11 +75,17 @@
             <div class="timer" id="timer">
                 <span id="diasNamoro"></span>
             </div>
+            
+            <!-- Controles de Admin (visíveis apenas quando logado como admin) -->
+            <div id="adminControls" class="admin-controls hidden">
+                <button id="adicionarMemoria" class="admin-button">Adicionar Memória</button>
+            </div>
+            
             <div class="memorias-lista" id="memoriasLista"></div>
         </div>
     </div>
 
-    <!-- Modal para Adicionar Memórias -->
+    <!-- Modal para Adicionar Memórias (apenas para admin) -->
     <div id="addMemoriaModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="fecharModal()">&times;</span>
@@ -82,15 +106,22 @@
             createMemory, 
             getMemories, 
             uploadImage,
-            getCurrentUser 
+            getCurrentUser,
+            isAdmin,
+            ADMIN_USER_ID
         } from './js/supabase.js';
+
+        // Carregar memórias ao iniciar a página (visível para todos)
+        carregarMemorias();
 
         // Verificar se o usuário já está logado ao carregar a página
         async function verificarUsuarioLogado() {
             const user = await getCurrentUser();
             if (user) {
-                mostrarConteudoPrincipal();
-                carregarMemorias();
+                // Verificar se é admin
+                if (user.id === ADMIN_USER_ID) {
+                    mostrarControlesAdmin();
+                }
             }
         }
 
@@ -117,37 +148,19 @@
                 }
                 
                 console.log('Login bem-sucedido:', data);
-                mostrarConteudoPrincipal();
-                carregarMemorias();
+                
+                // Verificar se é admin
+                const admin = await isAdmin();
+                if (admin) {
+                    mostrarControlesAdmin();
+                    document.getElementById('authSection').classList.add('hidden');
+                } else {
+                    alert('Apenas o administrador pode fazer login');
+                    await signOut();
+                }
             } catch (err) {
                 console.error('Exceção durante login:', err);
                 alert('Erro inesperado ao fazer login');
-            }
-        };
-
-        window.fazerCadastro = async () => {
-            const email = document.getElementById('emailInput').value;
-            const password = document.getElementById('passwordInput').value;
-            
-            if (!email || !password) {
-                alert('Por favor, preencha email e senha');
-                return;
-            }
-            
-            try {
-                const { data, error } = await signUp(email, password);
-                
-                if (error) {
-                    console.error('Erro de cadastro:', error);
-                    alert('Erro ao cadastrar: ' + error.message);
-                    return;
-                }
-                
-                console.log('Cadastro bem-sucedido:', data);
-                alert('Cadastro realizado com sucesso! Faça login para continuar.');
-            } catch (err) {
-                console.error('Exceção durante cadastro:', err);
-                alert('Erro inesperado ao fazer cadastro');
             }
         };
 
@@ -161,8 +174,10 @@
                     return;
                 }
                 
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('mainContent').classList.add('hidden');
+                // Esconder controles de admin
+                document.getElementById('adminControls').classList.add('hidden');
+                document.getElementById('adminLoginButton').classList.remove('hidden');
+                document.getElementById('sairButton').classList.add('hidden');
             } catch (err) {
                 console.error('Exceção ao sair:', err);
                 alert('Erro inesperado ao sair');
@@ -250,10 +265,11 @@
         }
 
         // Funções auxiliares
-        function mostrarConteudoPrincipal() {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            console.log('Conteúdo principal exibido');
+        function mostrarControlesAdmin() {
+            document.getElementById('adminControls').classList.remove('hidden');
+            document.getElementById('adminLoginButton').classList.add('hidden');
+            document.getElementById('sairButton').classList.remove('hidden');
+            console.log('Controles de admin exibidos');
         }
 
         window.fecharModal = () => {
@@ -276,6 +292,10 @@
             if (listaMemorias.style.display === 'block') {
                 carregarMemorias();
             }
+        });
+
+        document.getElementById('adminLoginButton').addEventListener('click', () => {
+            document.getElementById('authSection').classList.remove('hidden');
         });
 
         document.getElementById('sairButton').addEventListener('click', sair);
