@@ -7,7 +7,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Constante para o ID do administrador
 // Substitua pelo seu ID de usuário real quando souber qual é
-export const ADMIN_USER_ID = 'seu-id-de-usuario-admin';
+export const ADMIN_USER_ID = '9f657d83-d2ac-4629-a755-6fc4b37efe22';
 
 // Auth functions
 export async function signUp(email, password) {
