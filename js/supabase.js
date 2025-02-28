@@ -5,6 +5,10 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Constante para o ID do administrador
+// Substitua pelo seu ID de usuário real quando souber qual é
+export const ADMIN_USER_ID = 'seu-id-de-usuario-admin';
+
 // Auth functions
 export async function signUp(email, password) {
     const { data, error } = await supabase.auth.signUp({
@@ -36,11 +40,21 @@ export async function getCurrentUser() {
     return user;
 }
 
+export async function isAdmin() {
+    const user = await getCurrentUser();
+    return user && user.id === ADMIN_USER_ID;
+}
+
 // Memory functions
 export async function createMemory(memory) {
     const user = await getCurrentUser();
     if (!user) {
         return { error: { message: 'Usuário não autenticado' } };
+    }
+    
+    // Verificar se o usuário é administrador
+    if (user.id !== ADMIN_USER_ID) {
+        return { error: { message: 'Apenas o administrador pode adicionar memórias' } };
     }
     
     const { data, error } = await supabase
@@ -57,20 +71,20 @@ export async function createMemory(memory) {
 }
 
 export async function getMemories() {
-    const user = await getCurrentUser();
-    if (!user) {
-        return { error: { message: 'Usuário não autenticado' } };
-    }
-    
+    // Agora qualquer pessoa pode ver as memórias, mesmo sem estar logada
     const { data, error } = await supabase
         .from('memories')
         .select('*')
-        .eq('user_id', user.id)
         .order('date', { ascending: true });
     return { data, error };
 }
 
 export async function updateMemory(id, memory) {
+    const user = await getCurrentUser();
+    if (!user || user.id !== ADMIN_USER_ID) {
+        return { error: { message: 'Apenas o administrador pode atualizar memórias' } };
+    }
+    
     const { data, error } = await supabase
         .from('memories')
         .update({
@@ -85,6 +99,11 @@ export async function updateMemory(id, memory) {
 }
 
 export async function deleteMemory(id) {
+    const user = await getCurrentUser();
+    if (!user || user.id !== ADMIN_USER_ID) {
+        return { error: { message: 'Apenas o administrador pode excluir memórias' } };
+    }
+    
     const { error } = await supabase
         .from('memories')
         .delete()
@@ -94,6 +113,11 @@ export async function deleteMemory(id) {
 
 // Storage functions
 export async function uploadImage(file) {
+    const user = await getCurrentUser();
+    if (!user || user.id !== ADMIN_USER_ID) {
+        return { error: { message: 'Apenas o administrador pode fazer upload de imagens' } };
+    }
+    
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
